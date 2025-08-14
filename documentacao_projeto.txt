@@ -1,0 +1,106 @@
+
+📄 Documentação do Projeto — Catálogo de Produtos com Redis e Flask
+
+1. Visão Geral
+Este projeto implementa um catálogo de produtos utilizando:
+- Redis (banco NoSQL do tipo chave-valor) para armazenar os dados.
+- Flask (framework Python) para fornecer uma API e servir a interface web.
+- HTML + CSS + JavaScript para criar uma interface simples, moderna e funcional.
+- Docker para rodar o Redis sem instalação manual no sistema.
+
+O sistema permite:
+- Listar todos os produtos.
+- Filtrar produtos por categoria.
+- Visualizar informações detalhadas (nome, preço, estoque, categoria).
+
+2. Estrutura de Pastas
+meu_projeto_redis/
+│
+├── docker-compose.yml        # Configuração do Redis no Docker
+├── requirements.txt          # Lista de bibliotecas Python necessárias
+├── app.py                     # Backend Flask + conexão com Redis
+└── templates/
+    └── index.html             # Interface web do catálogo
+
+3. Tecnologias Utilizadas
+- Redis: Banco de dados NoSQL de chave-valor.
+- Docker Compose: Orquestração para subir o Redis rapidamente.
+- Flask: Framework web em Python.
+- HTML5 + CSS3 + JavaScript: Criação da interface e interatividade.
+- Python 3.x: Linguagem principal do backend.
+
+4. Configuração do Ambiente
+Pré-requisitos:
+- Python 3.x
+- Docker Desktop
+- VS Code
+
+Passo 1 — Criar a pasta do projeto:
+mkdir meu_projeto_redis
+cd meu_projeto_redis
+
+Passo 2 — Criar o arquivo docker-compose.yml:
+services:
+  redis:
+    image: redis:latest
+    container_name: redis_server
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+volumes:
+  redis_data:
+
+Passo 3 — Subir o Redis com Docker:
+docker-compose up -d
+
+Passo 4 — Criar e ativar ambiente virtual Python:
+python -m venv venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.env\Scripts\Activate.ps1
+
+Passo 5 — Instalar dependências:
+Arquivo requirements.txt:
+flask
+redis
+Instalar:
+pip install -r requirements.txt**
+
+5. Backend (app.py)
+O app.py:
+- Conecta ao Redis.
+- Inicializa dados de exemplo se ainda não existirem.
+- Cria duas rotas:
+  - / → Retorna a página HTML.
+  - /buscar → Retorna os produtos (todos ou filtrados por categoria) em JSON.
+
+6. Frontend (templates/index.html)
+- Interface minimalista com tons amarelo e branco.
+- Campo de busca para filtrar por categoria.
+- Requisições AJAX para /buscar.
+- Exibição dos produtos em "cards".
+
+7. Executando o Projeto
+1. Iniciar Redis:
+docker-compose up -d
+2. Ativar ambiente Python:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.env\Scripts\Activate.ps1
+3. Rodar backend Flask:
+python app.py
+4. Abrir navegador:
+http://localhost:5000
+
+8. Utilização
+- Campo vazio + Buscar → Lista todos os produtos.
+- Digite "Acessórios" → Filtra apenas produtos dessa categoria.
+- Digite "Informática" → Mostra apenas produtos dessa categoria.
+
+9. Estrutura do Banco no Redis
+- produto:<id> → Hash com dados do produto.
+- produtos → Lista com IDs de todos os produtos.
+- categoria:<nome> → Conjunto com IDs dos produtos dessa categoria.
+
+10. Encerrando os serviços
+- Parar Flask → CTRL + C
+- Parar Redis → docker-compose down

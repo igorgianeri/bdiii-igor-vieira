@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo de Produtos</title>
+    <style>
+        /* Estilo geral da página */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fffbea;
+            /* Fundo amarelo claro */
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            color: #d4a017;
+            /* Amarelo escuro */
+            text-align: center;
+        }
+
+        /* Área de busca */
+        .search-box {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input,
+        button {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #d4a017;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            background-color: #ffd700;
+            /* Amarelo */
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ffcc00;
+            /* Amarelo mais escuro no hover */
+        }
+
+        /* Área de resultados */
+        .results {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Estilo de cada card de produto */
+        .card {
+            background-color: #fff;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            width: 250px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #d4a017;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Catálogo de Produtos</h1>
+
+    <!-- Caixa de busca -->
+    <div class="search-box">
+        <input type="text" id="categoria" placeholder="Digite a categoria (ex: Acessórios)">
+        <button onclick="buscar()">Buscar</button>
+    </div>
+
+    <div class="add-box" style="text-align:center; margin-bottom:20px;">
+        <h2>Adicionar Produto</h2>
+        <input type="text" id="nome" placeholder="Nome">
+        <input type="text" id="preco" placeholder="Preço">
+        <input type="text" id="estoque" placeholder="Estoque">
+        <input type="text" id="categoriaAdd" placeholder="Categoria">
+        <button onclick="adicionar()">Adicionar</button>
+    </div>
+
+
+    <!-- Onde os resultados aparecerão -->
+    <div class="results" id="results"></div>
+
+    <script>
+        /* Função que consulta a API /buscar */
+        function buscar() {
+            const categoria = document.getElementById("categoria").value; // Pega valor do campo
+            let url = "/buscar"; // Endpoint da API
+
+            // Se o usuário digitou categoria, adiciona na URL
+            if (categoria) {
+                url += `?categoria=${encodeURIComponent(categoria)}`;
+            }
+
+            // Faz a requisição GET para o backend
+            fetch(url)
+                .then(res => res.json()) // Converte resposta para JSON
+                .then(data => {
+                    const resultsDiv = document.getElementById("results");
+                    resultsDiv.innerHTML = ""; // Limpa resultados anteriores
+
+                    // Para cada produto retornado
+                    data.forEach(produto => {
+                        const card = document.createElement("div");
+                        card.className = "card";
+                        // Monta o HTML do card
+                        card.innerHTML = `
+                    <h2>${produto.nome}</h2>
+                    <p><strong>Preço:</strong> R$ ${produto.preco}</p>
+                    <p><strong>Estoque:</strong> ${produto.estoque}</p>
+                    <p><strong>Categoria:</strong> ${produto.categoria}</p>
+                `;
+                        // Adiciona o card na página
+                        resultsDiv.appendChild(card);
+                    });
+                });
+        }
+
+        function adicionar() {
+            const nome = document.getElementById("nome").value;
+            const preco = document.getElementById("preco").value;
+            const estoque = document.getElementById("estoque").value;
+            const categoria = document.getElementById("categoriaAdd").value;
+
+            fetch("/adicionar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nome, preco, estoque, categoria })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert("Produto adicionado com sucesso! ID: " + data.id);
+                    buscar(); // atualiza a lista na tela
+                });
+        }
+
+
+    </script>
+</body>
+
+</html>

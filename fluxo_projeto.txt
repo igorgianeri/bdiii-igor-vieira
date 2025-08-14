@@ -1,0 +1,16 @@
+
++-------------------+         HTTP Request          +-------------------+         Redis Query          +-------------------+
+|                   | ---------------------------> |                   | ---------------------------> |                   |
+|  Página HTML/JS   |                               |  Backend Flask    |                               |   Banco Redis     |
+| (index.html)      | <--------------------------- | (app.py - Python) | <--------------------------- | (NoSQL chave-valor)|
+|                   |       HTTP Response (JSON)   |                   |       Dados (Hashes)         |                   |
++-------------------+                               +-------------------+                               +-------------------+
+
+
+Fluxo de funcionamento:
+1. O usuário acessa a página HTML (servida pelo Flask).
+2. O JavaScript da página envia requisição HTTP para a rota /buscar do Flask.
+3. O Flask processa a requisição e consulta os dados no Redis.
+4. O Redis retorna os dados para o Flask.
+5. O Flask envia os dados de volta para o navegador em formato JSON.
+6. O JavaScript atualiza a página com os resultados recebidos.
