@@ -1,154 +1,143 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Produtos</title>
     <style>
-        /* Estilo geral da página */
         body {
             font-family: Arial, sans-serif;
             background-color: #fffbea;
-            /* Fundo amarelo claro */
             margin: 0;
             padding: 20px;
-            color: #333;
         }
-
         h1 {
             color: #d4a017;
-            /* Amarelo escuro */
             text-align: center;
         }
-
-        /* Área de busca */
-        .search-box {
-            text-align: center;
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .busca, .adicionar {
             margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
         }
-
-        input,
-        button {
+        input, button {
             padding: 10px;
-            font-size: 16px;
-            border: 2px solid #d4a017;
+            margin: 5px 0;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            outline: none;
+            width: calc(100% - 22px);
         }
-
         button {
-            background-color: #ffd700;
-            /* Amarelo */
+            background-color: #f4c542;
+            color: #333;
+            font-weight: bold;
             cursor: pointer;
         }
-
         button:hover {
-            background-color: #ffcc00;
-            /* Amarelo mais escuro no hover */
+            background-color: #d4a017;
         }
-
-        /* Área de resultados */
-        .results {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+        .produtos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
-
-        /* Estilo de cada card de produto */
         .card {
-            background-color: #fff;
-            border: 2px solid #ffd700;
-            border-radius: 10px;
+            background: white;
             padding: 15px;
-            width: 250px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
         }
-
-        .card h2 {
+        .card h3 {
+            margin-top: 0;
             color: #d4a017;
         }
     </style>
 </head>
-
 <body>
-    <h1>Catálogo de Produtos</h1>
+    <div class="container">
+        <h1>Catálogo de Produtos</h1>
 
-    <!-- Caixa de busca -->
-    <div class="search-box">
-        <input type="text" id="categoria" placeholder="Digite a categoria (ex: Acessórios)">
-        <button onclick="buscar()">Buscar</button>
+        <div class="busca">
+            <h3>Buscar por categoria</h3>
+            <input type="text" id="categoria" placeholder="Digite a categoria">
+            <button onclick="buscarProdutos()">Buscar</button>
+            <button onclick="limparBusca()">Mostrar Todos</button>
+        </div>
+
+        <div class="adicionar">
+            <h3>Adicionar Produto</h3>
+            <input type="text" id="nome" placeholder="Nome">
+            <input type="text" id="preco" placeholder="Preço">
+            <input type="text" id="estoque" placeholder="Estoque">
+            <input type="text" id="novaCategoria" placeholder="Categoria">
+            <button onclick="adicionarProduto()">Adicionar</button>
+        </div>
+
+        <div class="produtos" id="listaProdutos"></div>
     </div>
-
-    <div class="add-box" style="text-align:center; margin-bottom:20px;">
-        <h2>Adicionar Produto</h2>
-        <input type="text" id="nome" placeholder="Nome">
-        <input type="text" id="preco" placeholder="Preço">
-        <input type="text" id="estoque" placeholder="Estoque">
-        <input type="text" id="categoriaAdd" placeholder="Categoria">
-        <button onclick="adicionar()">Adicionar</button>
-    </div>
-
-
-    <!-- Onde os resultados aparecerão -->
-    <div class="results" id="results"></div>
 
     <script>
-        /* Função que consulta a API /buscar */
-        function buscar() {
-            const categoria = document.getElementById("categoria").value; // Pega valor do campo
-            let url = "/buscar"; // Endpoint da API
-
-            // Se o usuário digitou categoria, adiciona na URL
-            if (categoria) {
-                url += `?categoria=${encodeURIComponent(categoria)}`;
-            }
-
-            // Faz a requisição GET para o backend
-            fetch(url)
-                .then(res => res.json()) // Converte resposta para JSON
+        function buscarProdutos() {
+            const categoria = document.getElementById("categoria").value;
+            fetch(`/buscar?categoria=${categoria}`)
+                .then(res => res.json())
                 .then(data => {
-                    const resultsDiv = document.getElementById("results");
-                    resultsDiv.innerHTML = ""; // Limpa resultados anteriores
-
-                    // Para cada produto retornado
-                    data.forEach(produto => {
-                        const card = document.createElement("div");
-                        card.className = "card";
-                        // Monta o HTML do card
-                        card.innerHTML = `
-                    <h2>${produto.nome}</h2>
-                    <p><strong>Preço:</strong> R$ ${produto.preco}</p>
-                    <p><strong>Estoque:</strong> ${produto.estoque}</p>
-                    <p><strong>Categoria:</strong> ${produto.categoria}</p>
-                `;
-                        // Adiciona o card na página
-                        resultsDiv.appendChild(card);
-                    });
+                    mostrarProdutos(data);
                 });
         }
 
-        function adicionar() {
+        function limparBusca() {
+            document.getElementById("categoria").value = "";
+            buscarProdutos();
+        }
+
+        function adicionarProduto() {
             const nome = document.getElementById("nome").value;
             const preco = document.getElementById("preco").value;
             const estoque = document.getElementById("estoque").value;
-            const categoria = document.getElementById("categoriaAdd").value;
+            const categoria = document.getElementById("novaCategoria").value;
 
             fetch("/adicionar", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nome, preco, estoque, categoria })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    alert("Produto adicionado com sucesso! ID: " + data.id);
-                    buscar(); // atualiza a lista na tela
-                });
+            }).then(res => res.json())
+              .then(() => {
+                  limparFormulario();
+                  buscarProdutos();
+              });
         }
 
+        function limparFormulario() {
+            document.getElementById("nome").value = "";
+            document.getElementById("preco").value = "";
+            document.getElementById("estoque").value = "";
+            document.getElementById("novaCategoria").value = "";
+        }
 
+        function mostrarProdutos(produtos) {
+            const lista = document.getElementById("listaProdutos");
+            lista.innerHTML = "";
+            produtos.forEach(prod => {
+                lista.innerHTML += `
+                    <div class="card">
+                        <h3>${prod.nome}</h3>
+                        <p>Preço: R$ ${prod.preco}</p>
+                        <p>Estoque: ${prod.estoque}</p>
+                        <p>Categoria: ${prod.categoria}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Carrega todos os produtos ao abrir
+        window.onload = buscarProdutos;
     </script>
 </body>
-
 </html>
